@@ -5,13 +5,13 @@ const cors = require('cors');
 const { sequelize } = require('./config/db');
 
 // Import routes
-const authRoutes = require('./server/routes/authRoutes');
-const estudianteRoutes = require('./server/routes/estudianteRoutes');
-const empresaRoutes = require('./server/routes/empresaRoutes');
-const puestoRoutes = require('./server/routes/puestoRoutes');
-const postulacionRoutes = require('./server/routes/postulacionRoutes');
-const perfilEstudianteRoutes = require('./server/routes/perfilEstudianteRoutes');
-const perfilEmpresaRoutes = require('./server/routes/perfilEmpresaRoutes');
+const authRoutes = require('./routes/authRoutes');
+const estudianteRoutes = require('./routes/estudianteRoutes');
+const empresaRoutes = require('./routes/empresaRoutes');
+const puestoRoutes = require('./routes/puestoRoutes');
+const postulacionRoutes = require('./routes/postulacionRoutes');
+const perfilEstudianteRoutes = require('./routes/perfilEstudianteRoutes');
+const perfilEmpresaRoutes = require('./routes/perfilEmpresaRoutes');
 
 // Initialize app
 const app = express();
