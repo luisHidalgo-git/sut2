@@ -3,8 +3,7 @@ const router = express.Router();
 const { 
   registerEstudiante, 
   registerEmpresa, 
-  loginEstudiante, 
-  loginEmpresa, 
+  login, 
   refreshToken 
 } = require('../controllers/authController');
 const { validarCamposEstudiante, validarCamposEmpresa } = require('../utils/validators');
@@ -15,11 +14,8 @@ router.post('/estudiantes/register', validarCamposEstudiante, registerEstudiante
 // Register company
 router.post('/empresas/register', validarCamposEmpresa, registerEmpresa);
 
-// Login student
-router.post('/estudiantes/login', loginEstudiante);
-
-// Login company
-router.post('/empresas/login', loginEmpresa);
+// Unified login
+router.post('/login', login);
 
 // Refresh token
 router.post('/refresh-token', refreshToken);

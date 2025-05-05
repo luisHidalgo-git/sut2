@@ -113,23 +113,32 @@ const registerEmpresa = async (req, res) => {
 };
 
 /**
- * Login for students
+ * Unified login for students and companies
  */
-const loginEstudiante = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find student by email
-    const estudiante = await Estudiante.findOne({ where: { email } });
-    if (!estudiante) {
+    // Check if user is a student
+    let user = await Estudiante.findOne({ where: { email } });
+    let userType = 'estudiante';
+
+    // If not a student, check if user is a company
+    if (!user) {
+      user = await Empresa.findOne({ where: { email } });
+      userType = 'empresa';
+    }
+
+    // If user is not found
+    if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Estudiante no encontrado'
+        message: 'Usuario no encontrado'
       });
     }
 
     // Check password
-    const passwordIsValid = await estudiante.checkPassword(password);
+    const passwordIsValid = await user.checkPassword(password);
     if (!passwordIsValid) {
       return res.status(401).json({
         success: false,
@@ -139,91 +148,29 @@ const loginEstudiante = async (req, res) => {
 
     // Generate token
     const token = jwt.sign(
-      { id: estudiante.id_estudiante, tipo: 'estudiante', email: estudiante.email },
+      { id: userType === 'estudiante' ? user.id_estudiante : user.id_empresa, tipo: userType, email: user.email },
       jwtConfig.secret,
       { expiresIn: jwtConfig.expiresIn }
     );
 
     // Generate refresh token
     const refreshToken = jwt.sign(
-      { id: estudiante.id_estudiante, tipo: 'estudiante', email: estudiante.email },
+      { id: userType === 'estudiante' ? user.id_estudiante : user.id_empresa, tipo: userType, email: user.email },
       jwtConfig.refreshSecret,
       { expiresIn: jwtConfig.refreshExpiresIn }
     );
 
+    // Return response
     return res.status(200).json({
       success: true,
       message: 'Inicio de sesión exitoso',
       token,
       refreshToken,
-      estudiante: {
-        id: estudiante.id_estudiante,
-        nombre: estudiante.nombre,
-        apellido: estudiante.apellido,
-        email: estudiante.email,
-        carrera: estudiante.carrera,
-        semestre: estudiante.semestre
-      }
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Error al iniciar sesión',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Login for companies
- */
-const loginEmpresa = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Find company by email
-    const empresa = await Empresa.findOne({ where: { email } });
-    if (!empresa) {
-      return res.status(404).json({
-        success: false,
-        message: 'Empresa no encontrada'
-      });
-    }
-
-    // Check password
-    const passwordIsValid = await empresa.checkPassword(password);
-    if (!passwordIsValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Contraseña incorrecta'
-      });
-    }
-
-    // Generate token
-    const token = jwt.sign(
-      { id: empresa.id_empresa, tipo: 'empresa', email: empresa.email },
-      jwtConfig.secret,
-      { expiresIn: jwtConfig.expiresIn }
-    );
-
-    // Generate refresh token
-    const refreshToken = jwt.sign(
-      { id: empresa.id_empresa, tipo: 'empresa', email: empresa.email },
-      jwtConfig.refreshSecret,
-      { expiresIn: jwtConfig.refreshExpiresIn }
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: 'Inicio de sesión exitoso',
-      token,
-      refreshToken,
-      empresa: {
-        id: empresa.id_empresa,
-        nombre: empresa.nombre,
-        email: empresa.email,
-        direccion: empresa.direccion,
-        tipo: empresa.tipo
+      user: {
+        id: userType === 'estudiante' ? user.id_estudiante : user.id_empresa,
+        nombre: user.nombre,
+        email: user.email,
+        ...(userType === 'estudiante' ? { carrera: user.carrera, semestre: user.semestre } : { direccion: user.direccion, tipo: user.tipo })
       }
     });
   } catch (error) {
@@ -275,7 +222,6 @@ const refreshToken = async (req, res) => {
 module.exports = {
   registerEstudiante,
   registerEmpresa,
-  loginEstudiante,
-  loginEmpresa,
+  login, // Reemplaza loginEstudiante y loginEmpresa con esta función unificada
   refreshToken
 };
