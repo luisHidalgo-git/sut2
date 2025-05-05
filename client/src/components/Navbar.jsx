@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { FaUserCircle } from 'react-icons/fa'
 
-const Navbar = ({ onAuthClick }) => {
+const Navbar = ({ onAuthClick, user, onLogout }) => {
     return (
         <nav className="bg-primary px-6 py-4">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -19,13 +19,27 @@ const Navbar = ({ onAuthClick }) => {
                     animate={{ opacity: 1, x: 0 }}
                     className="flex gap-4"
                 >
-                    <button
-                        onClick={onAuthClick}
-                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
-                    >
-                        <FaUserCircle className="text-xl" />
-                        <span>Iniciar Sesión</span>
-                    </button>
+                    {user ? (
+                        <div className="flex items-center gap-4">
+                            <span className="text-white">
+                                {user.carrera ? `${user.nombre} ${user.apellido}` : user.nombre}
+                            </span>
+                            <button
+                                onClick={onLogout}
+                                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+                            >
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={onAuthClick}
+                            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                            <FaUserCircle className="text-xl" />
+                            <span>Iniciar Sesión</span>
+                        </button>
+                    )}
                 </motion.div>
             </div>
         </nav>
