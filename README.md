@@ -9,7 +9,7 @@
 - React.js como frontend
 - PostgreSQL como base de datos
 
-## Configuración de archivo local
+## Configuración de proyecto local
 ### Creación y modificación de archivo .env en server
 ```
 DB_NAME=DB_NAME
@@ -22,5 +22,5 @@ PORT=3000
 
 ### Ejecución de backend
 ```
-cd server && npm run dev
+cd server && npm install && npm run dev
 ```
