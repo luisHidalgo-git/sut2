@@ -1,9 +1,52 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { FaEnvelope, FaLock, FaUser, FaBuilding, FaPhone } from 'react-icons/fa'
+import { login, registerStudent, registerCompany } from '../services/api'
+import toast from 'react-hot-toast'
 
 const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
     const [userType, setUserType] = useState('estudiante')
+    const [formData, setFormData] = useState({})
+    const [loading, setLoading] = useState(false)
+
+    const handleInputChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        })
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setLoading(true)
+
+        try {
+            let response
+
+            if (type === 'login') {
+                response = await login(formData)
+                toast.success('Inicio de sesión exitoso')
+            } else {
+                if (userType === 'estudiante') {
+                    response = await registerStudent(formData)
+                    toast.success('Estudiante registrado exitosamente')
+                } else {
+                    response = await registerCompany(formData)
+                    toast.success('Empresa registrada exitosamente')
+                }
+            }
+
+            // Store token
+            localStorage.setItem('token', response.token)
+            localStorage.setItem('user', JSON.stringify(response.user))
+
+            onClose()
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Error en la operación')
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const modalVariants = {
         hidden: { opacity: 0, scale: 0.8 },
@@ -13,27 +56,27 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
 
     const formFields = {
         login: [
-            { icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
-            { icon: FaLock, type: 'password', placeholder: 'Contraseña' }
+            { name: 'email', icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
+            { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' }
         ],
         register: {
             estudiante: [
-                { icon: FaUser, type: 'text', placeholder: 'Nombre' },
-                { icon: FaUser, type: 'text', placeholder: 'Apellido' },
-                { icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
-                { icon: FaLock, type: 'password', placeholder: 'Contraseña' },
-                { icon: FaUser, type: 'text', placeholder: 'Carrera' },
-                { icon: FaUser, type: 'number', placeholder: 'Semestre' },
-                { icon: FaPhone, type: 'tel', placeholder: 'Teléfono' }
+                { name: 'nombre', icon: FaUser, type: 'text', placeholder: 'Nombre' },
+                { name: 'apellido', icon: FaUser, type: 'text', placeholder: 'Apellido' },
+                { name: 'email', icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
+                { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' },
+                { name: 'carrera', icon: FaUser, type: 'text', placeholder: 'Carrera' },
+                { name: 'semestre', icon: FaUser, type: 'number', placeholder: 'Semestre' },
+                { name: 'telefono', icon: FaPhone, type: 'tel', placeholder: 'Teléfono' }
             ],
             empresa: [
-                { icon: FaBuilding, type: 'text', placeholder: 'Nombre de la empresa' },
-                { icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
-                { icon: FaLock, type: 'password', placeholder: 'Contraseña' },
-                { icon: FaBuilding, type: 'text', placeholder: 'Dirección' },
-                { icon: FaPhone, type: 'tel', placeholder: 'Teléfono' },
+                { name: 'nombre', icon: FaBuilding, type: 'text', placeholder: 'Nombre de la empresa' },
+                { name: 'email', icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
+                { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' },
+                { name: 'direccion', icon: FaBuilding, type: 'text', placeholder: 'Dirección' },
+                { name: 'telefono', icon: FaPhone, type: 'tel', placeholder: 'Teléfono' },
                 {
-                    icon: FaBuilding, type: 'select', placeholder: 'Tipo de empresa',
+                    name: 'tipo', icon: FaBuilding, type: 'select', placeholder: 'Tipo de empresa',
                     options: ['pequeña', 'mediana', 'grande']
                 }
             ]
@@ -71,12 +114,16 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                     </div>
                 )}
 
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {(type === 'login' ? formFields.login : formFields.register[userType]).map((field, index) => (
                         <div key={index} className="relative">
                             <field.icon className="absolute left-3 top-3 text-gray-400" />
                             {field.type === 'select' ? (
-                                <select className="w-full pl-10 pr-3 py-2 border rounded">
+                                <select
+                                    name={field.name}
+                                    onChange={handleInputChange}
+                                    className="w-full pl-10 pr-3 py-2 border rounded"
+                                >
                                     <option value="">Seleccione tipo de empresa</option>
                                     {field.options.map(option => (
                                         <option key={option} value={option}>
@@ -87,8 +134,11 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                             ) : (
                                 <input
                                     type={field.type}
+                                    name={field.name}
                                     placeholder={field.placeholder}
+                                    onChange={handleInputChange}
                                     className="w-full pl-10 pr-3 py-2 border rounded"
+                                    required
                                 />
                             )}
                         </div>
@@ -96,9 +146,10 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
 
                     <button
                         type="submit"
-                        className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark transition-colors"
+                        disabled={loading}
+                        className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark transition-colors disabled:opacity-50"
                     >
-                        {type === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
+                        {loading ? 'Cargando...' : type === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
                     </button>
                 </form>
 
