@@ -49,9 +49,9 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
     }
 
     const modalVariants = {
-        hidden: { opacity: 0, scale: 0.8 },
+        hidden: { opacity: 0, scale: 0.9 },
         visible: { opacity: 1, scale: 1 },
-        exit: { opacity: 0, scale: 0.8 }
+        exit: { opacity: 0, scale: 0.9 }
     }
 
     const formFields = {
@@ -91,9 +91,9 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
             variants={modalVariants}
             className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
         >
-            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-lg">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold">
+                    <h2 className="text-2xl font-bold text-gray-800">
                         {type === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
                     </h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
@@ -106,7 +106,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                         <select
                             value={userType}
                             onChange={(e) => setUserType(e.target.value)}
-                            className="w-full p-2 border rounded"
+                            className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-light"
                         >
                             <option value="estudiante">Estudiante</option>
                             <option value="empresa">Empresa</option>
@@ -122,7 +122,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                                 <select
                                     name={field.name}
                                     onChange={handleInputChange}
-                                    className="w-full pl-10 pr-3 py-2 border rounded"
+                                    className="w-full pl-10 pr-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary-light"
                                 >
                                     <option value="">Seleccione tipo de empresa</option>
                                     {field.options.map(option => (
@@ -137,7 +137,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                                     name={field.name}
                                     placeholder={field.placeholder}
                                     onChange={handleInputChange}
-                                    className="w-full pl-10 pr-3 py-2 border rounded"
+                                    className="w-full pl-10 pr-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary-light"
                                     required
                                 />
                             )}
