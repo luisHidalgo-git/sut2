@@ -1,63 +1,90 @@
-import { motion } from 'framer-motion'
-import { useState } from 'react'
-import { FaEnvelope, FaLock, FaUser, FaBuilding, FaPhone } from 'react-icons/fa'
-import { login, registerStudent, registerCompany } from '../services/api'
-import toast from 'react-hot-toast'
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { FaEnvelope, FaLock, FaUser, FaBuilding, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Form } from 'react-bootstrap';
+import { login, registerStudent, registerCompany } from '../services/api';
 
-const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
-    const [userType, setUserType] = useState('estudiante')
-    const [formData, setFormData] = useState({})
-    const [loading, setLoading] = useState(false)
+const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onError }) => {
+    const [userType, setUserType] = useState('estudiante');
+    const [formData, setFormData] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [validationErrors, setValidationErrors] = useState({});
+    const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
 
     const handleInputChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
-        })
-    }
+            [e.target.name]: e.target.value,
+        });
+        setValidationErrors({
+            ...validationErrors,
+            [e.target.name]: '',
+        });
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        if (!formData.email) errors.email = 'El correo electrónico es requerido';
+        if (!formData.password) errors.password = 'La contraseña es requerida';
+
+        if (type === 'register') {
+            if (!formData.nombre) errors.nombre = 'El nombre es requerido';
+            if (userType === 'estudiante') {
+                if (!formData.apellido) errors.apellido = 'El apellido es requerido';
+                if (!formData.carrera) errors.carrera = 'La carrera es requerida';
+            }
+        }
+
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        setLoading(true)
+        e.preventDefault();
+
+        if (!validateForm()) {
+            onError('Por favor complete todos los campos requeridos');
+            return;
+        }
+
+        setLoading(true);
 
         try {
-            let response
+            let response;
 
             if (type === 'login') {
-                response = await login(formData)
-                toast.success('Inicio de sesión exitoso')
+                response = await login(formData);
+                onLoginSuccess(response.user);
             } else {
                 if (userType === 'estudiante') {
-                    response = await registerStudent(formData)
-                    toast.success('Estudiante registrado exitosamente')
+                    response = await registerStudent(formData);
                 } else {
-                    response = await registerCompany(formData)
-                    toast.success('Empresa registrada exitosamente')
+                    response = await registerCompany(formData);
                 }
+                onLoginSuccess(response.user);
             }
 
-            // Store token
-            localStorage.setItem('token', response.token)
-            localStorage.setItem('user', JSON.stringify(response.user))
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('user', JSON.stringify(response.user));
 
-            onClose()
+            onClose();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Error en la operación')
+            onError(error.response?.data?.message || 'Error en la operación');
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const modalVariants = {
         hidden: { opacity: 0, scale: 0.9 },
         visible: { opacity: 1, scale: 1 },
-        exit: { opacity: 0, scale: 0.9 }
-    }
+        exit: { opacity: 0, scale: 0.9 },
+    };
 
     const formFields = {
         login: [
             { name: 'email', icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
-            { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' }
+            { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' },
         ],
         register: {
             estudiante: [
@@ -67,7 +94,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                 { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' },
                 { name: 'carrera', icon: FaUser, type: 'text', placeholder: 'Carrera' },
                 { name: 'semestre', icon: FaUser, type: 'number', placeholder: 'Semestre' },
-                { name: 'telefono', icon: FaPhone, type: 'tel', placeholder: 'Teléfono' }
+                { name: 'telefono', icon: FaPhone, type: 'tel', placeholder: 'Teléfono' },
             ],
             empresa: [
                 { name: 'nombre', icon: FaBuilding, type: 'text', placeholder: 'Nombre de la empresa' },
@@ -76,12 +103,15 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                 { name: 'direccion', icon: FaBuilding, type: 'text', placeholder: 'Dirección' },
                 { name: 'telefono', icon: FaPhone, type: 'tel', placeholder: 'Teléfono' },
                 {
-                    name: 'tipo', icon: FaBuilding, type: 'select', placeholder: 'Tipo de empresa',
-                    options: ['pequeña', 'mediana', 'grande']
-                }
-            ]
-        }
-    }
+                    name: 'tipo',
+                    icon: FaBuilding,
+                    type: 'select',
+                    placeholder: 'Tipo de empresa',
+                    options: ['pequeña', 'mediana', 'grande'],
+                },
+            ],
+        },
+    };
 
     return (
         <motion.div
@@ -103,45 +133,68 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
 
                 {type === 'register' && (
                     <div className="mb-6">
-                        <select
+                        <Form.Select
                             value={userType}
                             onChange={(e) => setUserType(e.target.value)}
                             className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-light"
                         >
                             <option value="estudiante">Estudiante</option>
                             <option value="empresa">Empresa</option>
-                        </select>
+                        </Form.Select>
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <Form onSubmit={handleSubmit} className="space-y-4">
                     {(type === 'login' ? formFields.login : formFields.register[userType]).map((field, index) => (
-                        <div key={index} className="relative">
-                            <field.icon className="absolute left-3 top-3 text-gray-400" />
-                            {field.type === 'select' ? (
-                                <select
-                                    name={field.name}
-                                    onChange={handleInputChange}
-                                    className="w-full pl-10 pr-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary-light"
-                                >
-                                    <option value="">Seleccione tipo de empresa</option>
-                                    {field.options.map(option => (
-                                        <option key={option} value={option}>
-                                            {option.charAt(0).toUpperCase() + option.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <input
-                                    type={field.type}
-                                    name={field.name}
-                                    placeholder={field.placeholder}
-                                    onChange={handleInputChange}
-                                    className="w-full pl-10 pr-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary-light"
-                                    required
-                                />
-                            )}
-                        </div>
+                        <Form.Group key={index} className="relative">
+                            <div className="flex items-center border rounded px-3 py-2 focus-within:ring-2 focus-within:ring-primary-light">
+                                <field.icon className="text-gray-400 text-xl mr-3" />
+                                {field.name === 'password' ? (
+                                    <div className="flex-1 relative">
+                                        <Form.Control
+                                            type={showPassword ? 'text' : 'password'}
+                                            name={field.name}
+                                            placeholder={field.placeholder}
+                                            onChange={handleInputChange}
+                                            isInvalid={!!validationErrors[field.name]}
+                                            className="w-full border-none focus:ring-0"
+                                        />
+                                        <span
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </span>
+                                    </div>
+                                ) : field.type === 'select' ? (
+                                    <Form.Select
+                                        name={field.name}
+                                        onChange={handleInputChange}
+                                        isInvalid={!!validationErrors[field.name]}
+                                        className="flex-1 border-none focus:ring-0"
+                                    >
+                                        <option value="">Seleccione tipo de empresa</option>
+                                        {field.options.map((option) => (
+                                            <option key={option} value={option}>
+                                                {option.charAt(0).toUpperCase() + option.slice(1)}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                ) : (
+                                    <Form.Control
+                                        type={field.type}
+                                        name={field.name}
+                                        placeholder={field.placeholder}
+                                        onChange={handleInputChange}
+                                        isInvalid={!!validationErrors[field.name]}
+                                        className="flex-1 border-none focus:ring-0"
+                                    />
+                                )}
+                            </div>
+                            <Form.Control.Feedback type="invalid" className="text-red-500 text-sm mt-1">
+                                {validationErrors[field.name]}
+                            </Form.Control.Feedback>
+                        </Form.Group>
                     ))}
 
                     <button
@@ -151,7 +204,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                     >
                         {loading ? 'Cargando...' : type === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
                     </button>
-                </form>
+                </Form>
 
                 <div className="mt-4 text-center">
                     <button
@@ -163,7 +216,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange }) => {
                 </div>
             </div>
         </motion.div>
-    )
-}
+    );
+};
 
-export default AuthModal
+export default AuthModal;

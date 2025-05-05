@@ -169,6 +169,7 @@ const login = async (req, res) => {
       user: {
         id: userType === 'estudiante' ? user.id_estudiante : user.id_empresa,
         nombre: user.nombre,
+        apellido: user.apellido, // Asegúrate de incluir este campo
         email: user.email,
         ...(userType === 'estudiante' ? { carrera: user.carrera, semestre: user.semestre } : { direccion: user.direccion, tipo: user.tipo })
       }

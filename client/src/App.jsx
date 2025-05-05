@@ -1,35 +1,70 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import Features from './components/Features'
-import AuthModal from './components/AuthModal'
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Features from './components/Features';
+import AuthModal from './components/AuthModal';
+import Dashboard from './components/Dashboard';
+import AlertComponent from './components/AlertComponent';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
-  const [isAuthOpen, setIsAuthOpen] = useState(false)
-  const [authType, setAuthType] = useState('login') // 'login' or 'register'
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [authType, setAuthType] = useState('login');
+    const [user, setUser] = useState(null);
+    const [alert, setAlert] = useState(null);
 
-  return (
-    <div className="min-h-screen bg-background-light">
-      <Navbar onAuthClick={() => setIsAuthOpen(true)} />
-      
-      <main>
-        <Hero />
-        <Features />
-      </main>
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        showAlert('Has cerrado sesión exitosamente', 'info');
+    };
 
-      <AnimatePresence>
-        {isAuthOpen && (
-          <AuthModal 
-            isOpen={isAuthOpen}
-            onClose={() => setIsAuthOpen(false)}
-            type={authType}
-            onTypeChange={setAuthType}
-          />
-        )}
-      </AnimatePresence>
-    </div>
-  )
+    const showAlert = (message, type) => {
+        setAlert({ message, type });
+        setTimeout(() => setAlert(null), 3000);
+    };
+
+    return (
+        <div className="min-h-screen bg-background-light">
+            <Navbar 
+                onAuthClick={() => setIsAuthOpen(true)} 
+                user={user} 
+                onLogout={handleLogout}
+            />
+
+            <AlertComponent alert={alert} onClose={() => setAlert(null)} />
+
+            <main>
+                {user ? (
+                    <Dashboard user={user} />
+                ) : (
+                    <>
+                        <Hero />
+                        <Features />
+                    </>
+                )}
+            </main>
+
+            <AnimatePresence>
+                {isAuthOpen && (
+                    <AuthModal 
+                        isOpen={isAuthOpen}
+                        onClose={() => setIsAuthOpen(false)}
+                        type={authType}
+                        onTypeChange={setAuthType}
+                        onLoginSuccess={(userData) => {
+                            setUser(userData);
+                            setIsAuthOpen(false);
+                            showAlert(`Bienvenido ${userData.nombre}`, 'success');
+                        }}
+                        onError={(message) => showAlert(message, 'danger')}
+                    />
+                )}
+            </AnimatePresence>
+        </div>
+    );
 }
 
-export default App
+export default App;
