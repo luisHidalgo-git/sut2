@@ -69,7 +69,7 @@ const Navbar = ({ onAuthClick, user, onLogout }) => {
                     <Button variant="secondary" onClick={() => setShowLogoutModal(false)}>
                         Cancelar
                     </Button>
-                    <Button variant="primary" onClick={handleConfirmLogout}>
+                    <Button variant="primary" className="bg-primary" onClick={handleConfirmLogout}>
                         Cerrar Sesión
                     </Button>
                 </Modal.Footer>

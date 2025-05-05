@@ -32,6 +32,7 @@ function App() {
                 onAuthClick={() => setIsAuthOpen(true)} 
                 user={user} 
                 onLogout={handleLogout}
+                className="bg-green-700 text-white" // Cambiado a verde
             />
 
             <AlertComponent alert={alert} onClose={() => setAlert(null)} />
@@ -41,7 +42,7 @@ function App() {
                     <Dashboard user={user} />
                 ) : (
                     <>
-                        <Hero />
+                        <Hero className="bg-green-600 text-white" /> {/* Fondo verde */}
                         <Features />
                     </>
                 )}
