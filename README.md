@@ -10,7 +10,7 @@
 - PostgreSQL como base de datos
 
 ## Configuración de proyecto local
-### Creación y modificación de archivo .env en server
+### Creación y modificación de archivo .env server
 ```
 DB_NAME=DB_NAME
 DB_USER=DB_USER

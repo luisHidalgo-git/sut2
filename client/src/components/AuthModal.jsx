@@ -10,28 +10,37 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
     const [loading, setLoading] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
+    const [touchedFields, setTouchedFields] = useState({});
 
     const handleInputChange = (e) => {
+        const { name, value } = e.target;
+
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value,
+            [name]: value,
         });
+
+        setTouchedFields({
+            ...touchedFields,
+            [name]: true,
+        });
+
         setValidationErrors({
             ...validationErrors,
-            [e.target.name]: '',
+            [name]: '',
         });
     };
 
     const validateForm = () => {
         const errors = {};
-        if (!formData.email) errors.email = 'El correo electrónico es requerido';
-        if (!formData.password) errors.password = 'La contraseña es requerida';
+        if (touchedFields.email && !formData.email) errors.email = 'El correo electrónico es requerido';
+        if (touchedFields.password && !formData.password) errors.password = 'La contraseña es requerida';
 
         if (type === 'register') {
-            if (!formData.nombre) errors.nombre = 'El nombre es requerido';
+            if (touchedFields.nombre && !formData.nombre) errors.nombre = 'El nombre es requerido';
             if (userType === 'estudiante') {
-                if (!formData.apellido) errors.apellido = 'El apellido es requerido';
-                if (!formData.carrera) errors.carrera = 'La carrera es requerida';
+                if (touchedFields.apellido && !formData.apellido) errors.apellido = 'El apellido es requerido';
+                if (touchedFields.carrera && !formData.carrera) errors.carrera = 'La carrera es requerida';
             }
         }
 
@@ -127,7 +136,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                         {type === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
                     </h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-circle-fill" viewBox="0 0 16 16">
                             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
                         </svg>
                     </button>
@@ -160,6 +169,8 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                                             onChange={handleInputChange}
                                             isInvalid={!!validationErrors[field.name]}
                                             className="w-full border-none focus:ring-0"
+                                            autoComplete="off"
+                                            autoFocus={false}
                                         />
                                         <span
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
@@ -174,6 +185,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                                         onChange={handleInputChange}
                                         isInvalid={!!validationErrors[field.name]}
                                         className="flex-1 border-none focus:ring-0"
+                                        autoFocus={false}
                                     >
                                         <option value="">Seleccione tipo de empresa</option>
                                         {field.options.map((option) => (
@@ -190,6 +202,8 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                                         onChange={handleInputChange}
                                         isInvalid={!!validationErrors[field.name]}
                                         className="flex-1 border-none focus:ring-0"
+                                        autoComplete="off"
+                                        autoFocus={false}
                                     />
                                 )}
                             </div>

@@ -1,7 +1,8 @@
 import { AnimatePresence } from 'framer-motion';
 import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
-import Dashboard from './components/Dashboard';
+import StudentDashboard from './pages/StudentDashboard';
+import CompanyDashboard from './pages/CompanyDashboard';
 import AuthModal from './components/AuthModal';
 import useAuth from './hooks/useAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -28,7 +29,11 @@ function App() {
             onAlertClose={() => setAlert(null)}
         >
             {user ? (
-                <Dashboard user={user} />
+                user.carrera ? (
+                    <StudentDashboard user={user} />
+                ) : (
+                    <CompanyDashboard user={user} />
+                )
             ) : (
                 <Home />
             )}
