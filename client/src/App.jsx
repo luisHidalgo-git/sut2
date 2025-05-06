@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -13,6 +13,16 @@ function App() {
     const [authType, setAuthType] = useState('login');
     const [user, setUser] = useState(null);
     const [alert, setAlert] = useState(null);
+
+    useEffect(() => {
+        // Check for stored user data when component mounts
+        const storedUser = localStorage.getItem('user');
+        const storedToken = localStorage.getItem('token');
+        
+        if (storedUser && storedToken) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -32,7 +42,7 @@ function App() {
                 onAuthClick={() => setIsAuthOpen(true)} 
                 user={user} 
                 onLogout={handleLogout}
-                className="bg-green-700 text-white" // Cambiado a verde
+                className="bg-green-700 text-white"
             />
 
             <AlertComponent alert={alert} onClose={() => setAlert(null)} />
@@ -42,7 +52,7 @@ function App() {
                     <Dashboard user={user} />
                 ) : (
                     <>
-                        <Hero className="bg-green-600 text-white" /> {/* Fondo verde */}
+                        <Hero className="bg-green-600 text-white" />
                         <Features />
                     </>
                 )}
