@@ -19,8 +19,16 @@ DB_HOST=localhost
 DB_PORT=5432
 PORT=3000
 ```
+### Creación y modificacion de archivo .env client
+```
+VITE_API_BASE_URL=http://localhost:3000/api
+```
 
 ### Ejecución de backend
 ```
 cd server && npm install && npm run dev
+```
+### Ejecución de frontend
+```
+cd client && npm install && npm run dev
 ```
