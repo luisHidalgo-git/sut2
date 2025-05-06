@@ -1,62 +1,37 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import AuthModal from './components/AuthModal';
+import { AnimatePresence } from 'framer-motion';
+import MainLayout from './layouts/MainLayout';
+import Home from './pages/Home';
 import Dashboard from './components/Dashboard';
-import AlertComponent from './components/AlertComponent';
+import AuthModal from './components/AuthModal';
+import useAuth from './hooks/useAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
-    const [isAuthOpen, setIsAuthOpen] = useState(false);
-    const [authType, setAuthType] = useState('login');
-    const [user, setUser] = useState(null);
-    const [alert, setAlert] = useState(null);
-
-    useEffect(() => {
-        // Check for stored user data when component mounts
-        const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('token');
-        
-        if (storedUser && storedToken) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        showAlert('Has cerrado sesión exitosamente', 'info');
-    };
-
-    const showAlert = (message, type) => {
-        setAlert({ message, type });
-        setTimeout(() => setAlert(null), 3000);
-    };
+    const {
+        user,
+        setUser,
+        isAuthOpen,
+        setIsAuthOpen,
+        authType,
+        setAuthType,
+        alert,
+        handleLogout,
+        showAlert
+    } = useAuth();
 
     return (
-        <div className="min-h-screen bg-background-light">
-            <Navbar 
-                onAuthClick={() => setIsAuthOpen(true)} 
-                user={user} 
-                onLogout={handleLogout}
-                className="bg-green-700 text-white"
-            />
-
-            <AlertComponent alert={alert} onClose={() => setAlert(null)} />
-
-            <main>
-                {user ? (
-                    <Dashboard user={user} />
-                ) : (
-                    <>
-                        <Hero className="bg-green-600 text-white" />
-                        <Features />
-                    </>
-                )}
-            </main>
+        <MainLayout
+            user={user}
+            onAuthClick={() => setIsAuthOpen(true)}
+            onLogout={handleLogout}
+            alert={alert}
+            onAlertClose={() => setAlert(null)}
+        >
+            {user ? (
+                <Dashboard user={user} />
+            ) : (
+                <Home />
+            )}
 
             <AnimatePresence>
                 {isAuthOpen && (
@@ -74,7 +49,7 @@ function App() {
                     />
                 )}
             </AnimatePresence>
-        </div>
+        </MainLayout>
     );
 }
 
