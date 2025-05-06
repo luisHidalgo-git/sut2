@@ -206,16 +206,16 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                     >
                         {loading ? 'Cargando...' : type === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
                     </button>
-                </Form>
 
-                <div className="mt-4 text-center">
-                    <button
-                        onClick={() => onTypeChange(type === 'login' ? 'register' : 'login')}
-                        className="text-primary hover:text-primary-dark"
-                    >
-                        {type === 'login' ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
-                    </button>
-                </div>
+                    <div className="mt-4 text-center">
+                        <button
+                            onClick={() => onTypeChange(type === 'login' ? 'register' : 'login')}
+                            className="text-primary hover:text-primary-dark"
+                        >
+                            {type === 'login' ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+                        </button>
+                    </div>
+                </Form>
             </div>
         </motion.div>
     );
