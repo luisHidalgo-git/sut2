@@ -33,15 +33,24 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
 
     const validateForm = () => {
         const errors = {};
-        if (touchedFields.email && !formData.email) errors.email = 'El correo electrónico es requerido';
-        if (touchedFields.password && !formData.password) errors.password = 'La contraseña es requerida';
+        const requiredFields = type === 'login' 
+            ? ['email', 'password']
+            : userType === 'estudiante'
+                ? ['nombre', 'apellido', 'email', 'password', 'carrera']
+                : ['nombre', 'email', 'password'];
 
-        if (type === 'register') {
-            if (touchedFields.nombre && !formData.nombre) errors.nombre = 'El nombre es requerido';
-            if (userType === 'estudiante') {
-                if (touchedFields.apellido && !formData.apellido) errors.apellido = 'El apellido es requerido';
-                if (touchedFields.carrera && !formData.carrera) errors.carrera = 'La carrera es requerida';
+        requiredFields.forEach(field => {
+            if (!formData[field]) {
+                errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} es requerido`;
             }
+        });
+
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+            errors.email = 'Email inválido';
+        }
+
+        if (formData.password && formData.password.length < 6) {
+            errors.password = 'La contraseña debe tener al menos 6 caracteres';
         }
 
         setValidationErrors(errors);
@@ -52,7 +61,6 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
         e.preventDefault();
 
         if (!validateForm()) {
-            onError('Por favor complete todos los campos requeridos');
             return;
         }
 
@@ -63,22 +71,28 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
 
             if (type === 'login') {
                 response = await login(formData);
-                onLoginSuccess(response.user);
+                if (response?.user) {
+                    onLoginSuccess(response.user);
+                }
             } else {
                 if (userType === 'estudiante') {
                     response = await registerStudent(formData);
                 } else {
                     response = await registerCompany(formData);
                 }
-                onLoginSuccess(response.user);
+                if (response?.user) {
+                    onLoginSuccess(response.user);
+                }
             }
 
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
-
-            onClose();
+            if (response?.token) {
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('user', JSON.stringify(response.user));
+                onClose();
+            }
         } catch (error) {
-            onError(error.response?.data?.message || 'Error en la operación');
+            const errorMessage = error.response?.data?.message || 'Error en la operación';
+            onError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -207,9 +221,11 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                                     />
                                 )}
                             </div>
-                            <Form.Control.Feedback type="invalid" className="text-red-500 text-sm mt-1">
-                                {validationErrors[field.name]}
-                            </Form.Control.Feedback>
+                            {validationErrors[field.name] && (
+                                <div className="text-red-500 text-sm mt-1">
+                                    {validationErrors[field.name]}
+                                </div>
+                            )}
                         </Form.Group>
                     ))}
 
@@ -223,6 +239,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
 
                     <div className="mt-4 text-center">
                         <button
+                            type="button"
                             onClick={() => onTypeChange(type === 'login' ? 'register' : 'login')}
                             className="text-primary hover:text-primary-dark"
                         >
