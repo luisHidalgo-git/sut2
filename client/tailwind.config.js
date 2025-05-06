@@ -8,18 +8,18 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: '#1E3A8A', // Azul oscuro
-                    light: '#3B82F6',  // Azul claro
-                    dark: '#1E40AF'   // Azul más oscuro
+                    DEFAULT: '#1E3A8A',
+                    light: '#3B82F6',
+                    dark: '#1E40AF'
                 },
                 secondary: {
-                    DEFAULT: '#2563EB', // Azul intermedio
-                    light: '#60A5FA',   // Azul más claro
-                    dark: '#1D4ED8'     // Azul intenso
+                    DEFAULT: '#2563EB',
+                    light: '#60A5FA',
+                    dark: '#1D4ED8'
                 },
                 background: {
-                    light: '#F3F4F6',   // Gris claro
-                    dark: '#1E293B'     // Gris oscuro
+                    light: '#F3F4F6',
+                    dark: '#1E293B'
                 }
             }
         },
