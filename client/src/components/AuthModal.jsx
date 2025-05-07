@@ -58,6 +58,17 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
         return Object.keys(errors).length === 0;
     };
 
+    const showSuccessAlert = (title, text) => {
+        Swal.fire({
+            icon: 'success',
+            title,
+            text,
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -73,31 +84,20 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
             if (type === 'login') {
                 response = await login(formData);
                 if (response?.user) {
+                    showSuccessAlert('¡Bienvenido!', `Has iniciado sesión como ${response.user.nombre}`);
                     onLoginSuccess(response.user);
                 }
             } else {
                 if (userType === 'estudiante') {
                     response = await registerStudent(formData);
                     if (response?.user) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Registro exitoso!',
-                            text: 'Estudiante registrado correctamente',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
+                        showSuccessAlert('¡Registro exitoso!', 'Tu cuenta de estudiante ha sido creada');
                         onLoginSuccess(response.user);
                     }
                 } else {
                     response = await registerCompany(formData);
                     if (response?.user) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Registro exitoso!',
-                            text: 'Empresa registrada correctamente',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
+                        showSuccessAlert('¡Registro exitoso!', 'Tu cuenta de empresa ha sido creada');
                         onLoginSuccess(response.user);
                     }
                 }
