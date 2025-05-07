@@ -5,6 +5,7 @@
 - Manejo de usuarios por estudiantes y empresas
 - Implementación de archivos academicos
 - Manejo de variables de entorno
+- Manejo de Sweetalerts
 - Express.js como backend
 - React.js como frontend
 - PostgreSQL como base de datos
