@@ -58,8 +58,8 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
         return Object.keys(errors).length === 0;
     };
 
-    const showSuccessAlert = (title, text) => {
-        Swal.fire({
+    const showSuccessAlert = async (title, text) => {
+        return await Swal.fire({
             icon: 'success',
             title,
             text,
@@ -84,21 +84,18 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
             if (type === 'login') {
                 response = await login(formData);
                 if (response?.user) {
-                    showSuccessAlert('¡Bienvenido!', `Has iniciado sesión como ${response.user.nombre}`);
-                    onLoginSuccess(response.user);
+                    await showSuccessAlert('¡Bienvenido!', `Has iniciado sesión como ${response.user.nombre}`);
                 }
             } else {
                 if (userType === 'estudiante') {
                     response = await registerStudent(formData);
                     if (response?.user) {
-                        showSuccessAlert('¡Registro exitoso!', 'Tu cuenta de estudiante ha sido creada');
-                        onLoginSuccess(response.user);
+                        await showSuccessAlert('¡Registro exitoso!', 'Tu cuenta de estudiante ha sido creada');
                     }
                 } else {
                     response = await registerCompany(formData);
                     if (response?.user) {
-                        showSuccessAlert('¡Registro exitoso!', 'Tu cuenta de empresa ha sido creada');
-                        onLoginSuccess(response.user);
+                        await showSuccessAlert('¡Registro exitoso!', 'Tu cuenta de empresa ha sido creada');
                     }
                 }
             }
@@ -106,6 +103,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
             if (response?.token) {
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('user', JSON.stringify(response.user));
+                onLoginSuccess(response.user);
                 onClose();
             }
         } catch (error) {
