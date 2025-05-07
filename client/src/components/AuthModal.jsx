@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { FaEnvelope, FaLock, FaUser, FaBuilding, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Form } from 'react-bootstrap';
 import { login, registerStudent, registerCompany } from '../services/api';
+import Swal from 'sweetalert2';
 
 const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onError }) => {
     const [userType, setUserType] = useState('estudiante');
@@ -77,11 +78,28 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
             } else {
                 if (userType === 'estudiante') {
                     response = await registerStudent(formData);
+                    if (response?.user) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Registro exitoso!',
+                            text: 'Estudiante registrado correctamente',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        onLoginSuccess(response.user);
+                    }
                 } else {
                     response = await registerCompany(formData);
-                }
-                if (response?.user) {
-                    onLoginSuccess(response.user);
+                    if (response?.user) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Registro exitoso!',
+                            text: 'Empresa registrada correctamente',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        onLoginSuccess(response.user);
+                    }
                 }
             }
 
