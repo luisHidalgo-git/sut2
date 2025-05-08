@@ -8,14 +8,14 @@ const AlertComponent = ({ alert, onClose }) => {
                 icon: alert.type === 'success' ? 'success' : alert.type === 'info' ? 'info' : 'error',
                 title: alert.message,
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 2000,
                 timerProgressBar: true,
                 didClose: onClose,
             });
         }
     }, [alert, onClose]);
 
-    return null; // No se necesita renderizar nada directamente
+    return null;
 };
 
 export default AlertComponent;

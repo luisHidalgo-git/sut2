@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { FaEnvelope, FaLock, FaUser, FaBuilding, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Form } from 'react-bootstrap';
 import { login, registerStudent, registerCompany } from '../services/api';
 import Swal from 'sweetalert2';
+import AuthForm from './auth/AuthForm';
+import UserTypeSelect from './auth/UserTypeSelect';
 
 const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onError }) => {
     const [userType, setUserType] = useState('estudiante');
@@ -103,7 +104,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                 
                 onLoginSuccess(response.user);
                 onClose();
-                return; // Exit the function after successful operation
+                return;
             }
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Error en la operación';
@@ -117,38 +118,6 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
         hidden: { opacity: 0, scale: 0.9 },
         visible: { opacity: 1, scale: 1 },
         exit: { opacity: 0, scale: 0.9 },
-    };
-
-    const formFields = {
-        login: [
-            { name: 'email', icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
-            { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' },
-        ],
-        register: {
-            estudiante: [
-                { name: 'nombre', icon: FaUser, type: 'text', placeholder: 'Nombre' },
-                { name: 'apellido', icon: FaUser, type: 'text', placeholder: 'Apellido' },
-                { name: 'email', icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
-                { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' },
-                { name: 'carrera', icon: FaUser, type: 'text', placeholder: 'Carrera' },
-                { name: 'semestre', icon: FaUser, type: 'number', placeholder: 'Semestre' },
-                { name: 'telefono', icon: FaPhone, type: 'tel', placeholder: 'Teléfono' },
-            ],
-            empresa: [
-                { name: 'nombre', icon: FaBuilding, type: 'text', placeholder: 'Nombre de la empresa' },
-                { name: 'email', icon: FaEnvelope, type: 'email', placeholder: 'Correo electrónico' },
-                { name: 'password', icon: FaLock, type: 'password', placeholder: 'Contraseña' },
-                { name: 'direccion', icon: FaBuilding, type: 'text', placeholder: 'Dirección' },
-                { name: 'telefono', icon: FaPhone, type: 'tel', placeholder: 'Teléfono' },
-                {
-                    name: 'tipo',
-                    icon: FaBuilding,
-                    type: 'select',
-                    placeholder: 'Tipo de empresa',
-                    options: ['pequeña', 'mediana', 'grande'],
-                },
-            ],
-        },
     };
 
     return (
@@ -172,77 +141,18 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                 </div>
 
                 {type === 'register' && (
-                    <div className="mb-6">
-                        <Form.Select
-                            value={userType}
-                            onChange={(e) => setUserType(e.target.value)}
-                            className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-primary-light"
-                        >
-                            <option value="estudiante">Estudiante</option>
-                            <option value="empresa">Empresa</option>
-                        </Form.Select>
-                    </div>
+                    <UserTypeSelect userType={userType} setUserType={setUserType} />
                 )}
 
                 <Form onSubmit={handleSubmit} className="space-y-4">
-                    {(type === 'login' ? formFields.login : formFields.register[userType]).map((field, index) => (
-                        <Form.Group key={index} className="relative">
-                            <div className="flex items-center border rounded px-3 py-2 focus-within:ring-2 focus-within:ring-primary-light">
-                                <field.icon className="text-gray-400 text-xl mr-3" />
-                                {field.name === 'password' ? (
-                                    <div className="flex-1 relative">
-                                        <Form.Control
-                                            type={showPassword ? 'text' : 'password'}
-                                            name={field.name}
-                                            placeholder={field.placeholder}
-                                            onChange={handleInputChange}
-                                            isInvalid={!!validationErrors[field.name]}
-                                            className="w-full border-none focus:ring-0"
-                                            autoComplete="off"
-                                            autoFocus={false}
-                                        />
-                                        <span
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                        >
-                                            {showPassword ? <FaEyeSlash /> : <FaEye />}
-                                        </span>
-                                    </div>
-                                ) : field.type === 'select' ? (
-                                    <Form.Select
-                                        name={field.name}
-                                        onChange={handleInputChange}
-                                        isInvalid={!!validationErrors[field.name]}
-                                        className="flex-1 border-none focus:ring-0"
-                                        autoFocus={false}
-                                    >
-                                        <option value="">Seleccione tipo de empresa</option>
-                                        {field.options.map((option) => (
-                                            <option key={option} value={option}>
-                                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                ) : (
-                                    <Form.Control
-                                        type={field.type}
-                                        name={field.name}
-                                        placeholder={field.placeholder}
-                                        onChange={handleInputChange}
-                                        isInvalid={!!validationErrors[field.name]}
-                                        className="flex-1 border-none focus:ring-0"
-                                        autoComplete="off"
-                                        autoFocus={false}
-                                    />
-                                )}
-                            </div>
-                            {validationErrors[field.name] && (
-                                <div className="text-red-500 text-sm mt-1">
-                                    {validationErrors[field.name]}
-                                </div>
-                            )}
-                        </Form.Group>
-                    ))}
+                    <AuthForm
+                        type={type}
+                        userType={userType}
+                        handleInputChange={handleInputChange}
+                        validationErrors={validationErrors}
+                        showPassword={showPassword}
+                        setShowPassword={setShowPassword}
+                    />
 
                     <button
                         type="submit"
