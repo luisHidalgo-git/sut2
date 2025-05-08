@@ -19,10 +19,15 @@ function App() {
         handleLogout,
     } = useAuth();
 
+    const handleAuthClick = (type) => {
+        setAuthType(type);
+        setIsAuthOpen(true);
+    };
+
     return (
         <MainLayout
             user={user}
-            onAuthClick={() => setIsAuthOpen(true)}
+            onAuthClick={handleAuthClick}
             onLogout={handleLogout}
             alert={alert}
             onAlertClose={() => setAlert(null)}
@@ -49,7 +54,6 @@ function App() {
                             setIsAuthOpen(false);
                         }}
                         onError={(message) => {
-                            // Only show error if there's an actual error
                             if (message !== 'Error en la operación') {
                                 setAlert({ message, type: 'danger' });
                             }

@@ -46,13 +46,22 @@ const Navbar = ({ onAuthClick, user, onLogout }) => {
                                 </button>
                             </div>
                         ) : (
-                            <button
-                                onClick={onAuthClick}
-                                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
-                            >
-                                <FaUserCircle className="text-xl" />
-                                <span>Iniciar Sesión</span>
-                            </button>
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => onAuthClick('login')}
+                                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+                                >
+                                    <FaUserCircle className="text-xl" />
+                                    <span>Iniciar Sesión</span>
+                                </button>
+                                <button
+                                    onClick={() => onAuthClick('register')}
+                                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+                                >
+                                    <FaUserCircle className="text-xl" />
+                                    <span>Registrarse</span>
+                                </button>
+                            </div>
                         )}
                     </motion.div>
                 </div>
