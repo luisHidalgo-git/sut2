@@ -16,16 +16,24 @@ export const useAuth = () => {
         }
     }, []);
 
+    // Clear any existing alert timeout when setting a new alert
+    useEffect(() => {
+        let timeoutId;
+        if (alert) {
+            timeoutId = setTimeout(() => setAlert(null), 3000);
+        }
+        return () => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
+    }, [alert]);
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
-        showAlert('Has cerrado sesión exitosamente', 'info');
-    };
-
-    const showAlert = (message, type) => {
-        setAlert({ message, type });
-        setTimeout(() => setAlert(null), 3000);
+        setAlert({ message: 'Has cerrado sesión exitosamente', type: 'info' });
     };
 
     return {
@@ -36,8 +44,8 @@ export const useAuth = () => {
         authType,
         setAuthType,
         alert,
+        setAlert,
         handleLogout,
-        showAlert
     };
 };
 

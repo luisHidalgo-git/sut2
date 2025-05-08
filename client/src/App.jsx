@@ -17,7 +17,6 @@ function App() {
         setAuthType,
         alert,
         handleLogout,
-        showAlert
     } = useAuth();
 
     return (
@@ -48,9 +47,13 @@ function App() {
                         onLoginSuccess={(userData) => {
                             setUser(userData);
                             setIsAuthOpen(false);
-                            showAlert(`Bienvenido ${userData.nombre}`, 'success');
                         }}
-                        onError={(message) => showAlert(message, 'danger')}
+                        onError={(message) => {
+                            // Only show error if there's an actual error
+                            if (message !== 'Error en la operación') {
+                                setAlert({ message, type: 'danger' });
+                            }
+                        }}
                     />
                 )}
             </AnimatePresence>
