@@ -103,6 +103,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                 
                 onLoginSuccess(response.user);
                 onClose();
+                return; // Exit the function after successful operation
             }
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Error en la operación';
