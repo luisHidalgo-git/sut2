@@ -83,26 +83,24 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
 
             if (type === 'login') {
                 response = await login(formData);
-                if (response?.user) {
-                    await showSuccessAlert('¡Bienvenido!', `Has iniciado sesión como ${response.user.nombre}`);
-                }
             } else {
                 if (userType === 'estudiante') {
                     response = await registerStudent(formData);
-                    if (response?.user) {
-                        await showSuccessAlert('¡Registro exitoso!', 'Tu cuenta de estudiante ha sido creada');
-                    }
                 } else {
                     response = await registerCompany(formData);
-                    if (response?.user) {
-                        await showSuccessAlert('¡Registro exitoso!', 'Tu cuenta de empresa ha sido creada');
-                    }
                 }
             }
 
             if (response?.token) {
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('user', JSON.stringify(response.user));
+                
+                if (type === 'login') {
+                    await showSuccessAlert('¡Bienvenido!', `Has iniciado sesión como ${response.user.nombre}`);
+                } else {
+                    await showSuccessAlert('¡Registro exitoso!', `Tu cuenta ha sido creada correctamente`);
+                }
+                
                 onLoginSuccess(response.user);
                 onClose();
             }
