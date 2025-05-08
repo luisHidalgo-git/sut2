@@ -1,10 +1,10 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { Form } from 'react-bootstrap';
 import { login, registerStudent, registerCompany } from '../services/api';
 import Swal from 'sweetalert2';
-import AuthForm from './auth/AuthForm';
-import UserTypeSelect from './auth/UserTypeSelect';
+import LoginSection from './auth/LoginSection';
+import RegisterSection from './auth/RegisterSection';
+import WelcomeSection from './auth/WelcomeSection';
 
 const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onError }) => {
     const [userType, setUserType] = useState('estudiante');
@@ -16,17 +16,14 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-
         setFormData({
             ...formData,
             [name]: value,
         });
-
         setTouchedFields({
             ...touchedFields,
             [name]: true,
         });
-
         setValidationErrors({
             ...validationErrors,
             [name]: '',
@@ -72,16 +69,11 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
+        if (!validateForm()) return;
         setLoading(true);
 
         try {
             let response;
-
             if (type === 'login') {
                 response = await login(formData);
             } else {
@@ -114,64 +106,62 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
         }
     };
 
-    const modalVariants = {
-        hidden: { opacity: 0, scale: 0.9 },
-        visible: { opacity: 1, scale: 1 },
-        exit: { opacity: 0, scale: 0.9 },
+    const formProps = {
+        type,
+        userType,
+        handleInputChange,
+        validationErrors,
+        showPassword,
+        setShowPassword,
     };
 
     return (
         <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={modalVariants}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
         >
-            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-lg">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">
-                        {type === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
-                    </h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-circle-fill" viewBox="0 0 16 16">
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
-                        </svg>
-                    </button>
-                </div>
-
-                {type === 'register' && (
-                    <UserTypeSelect userType={userType} setUserType={setUserType} />
-                )}
-
-                <Form onSubmit={handleSubmit} className="space-y-4">
-                    <AuthForm
-                        type={type}
-                        userType={userType}
-                        handleInputChange={handleInputChange}
-                        validationErrors={validationErrors}
-                        showPassword={showPassword}
-                        setShowPassword={setShowPassword}
-                    />
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark transition-colors disabled:opacity-50"
-                    >
-                        {loading ? 'Cargando...' : type === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
-                    </button>
-
-                    <div className="mt-4 text-center">
-                        <button
-                            type="button"
-                            onClick={() => onTypeChange(type === 'login' ? 'register' : 'login')}
-                            className="text-primary hover:text-primary-dark"
+            <div className="bg-white rounded-lg overflow-hidden w-full max-w-4xl mx-4 shadow-lg flex">
+                <AnimatePresence mode="wait">
+                    {type === 'login' ? (
+                        <motion.div
+                            key="login"
+                            initial={{ x: 300, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: -300, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 100 }}
+                            className="w-full flex"
                         >
-                            {type === 'login' ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
-                        </button>
-                    </div>
-                </Form>
+                            <WelcomeSection type={type} onTypeChange={onTypeChange} />
+                            <LoginSection
+                                onClose={onClose}
+                                handleSubmit={handleSubmit}
+                                loading={loading}
+                                formProps={formProps}
+                            />
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="register"
+                            initial={{ x: -300, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: 300, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 100 }}
+                            className="w-full flex"
+                        >
+                            <RegisterSection
+                                onClose={onClose}
+                                handleSubmit={handleSubmit}
+                                loading={loading}
+                                formProps={formProps}
+                                userType={userType}
+                                setUserType={setUserType}
+                            />
+                            <WelcomeSection type={type} onTypeChange={onTypeChange} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </motion.div>
     );
