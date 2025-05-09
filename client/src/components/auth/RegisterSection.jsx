@@ -12,7 +12,7 @@ const socialIcons = [
 
 const RegisterSection = ({ onClose, handleSubmit, loading, formProps, userType, setUserType }) => {
     return (
-        <div className="w-full md:w-1/2 p-6 md:p-12">
+        <div className="w-full md:w-1/2 p-6 md:p-12 overflow-y-auto">
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-xl md:text-2xl font-bold">Registrarse</h2>
                 <button onClick={onClose} className="text-gray-500 hover:text-gray-700">

@@ -122,7 +122,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
             exit={{ opacity: 0 }}
             className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4"
         >
-            <div className="bg-white rounded-lg overflow-hidden w-full max-w-4xl shadow-lg">
+            <div className="bg-white rounded-lg overflow-hidden w-full max-w-4xl shadow-lg max-h-[90vh] flex">
                 <AnimatePresence mode="wait">
                     {type === 'login' ? (
                         <motion.div
@@ -148,7 +148,7 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                             animate={{ x: 0, opacity: 1 }}
                             exit={{ x: 300, opacity: 0 }}
                             transition={{ type: "spring", stiffness: 100 }}
-                            className="flex flex-col md:flex-row w-full"
+                            className="flex flex-col md:flex-row w-full overflow-hidden"
                         >
                             <RegisterSection
                                 onClose={onClose}

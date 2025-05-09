@@ -17,8 +17,8 @@ const Navbar = ({ onAuthClick, user, onLogout }) => {
 
     return (
         <>
-            <nav className="bg-primary px-6 py-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <nav className="bg-primary px-4 py-4">
+                <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -31,34 +31,34 @@ const Navbar = ({ onAuthClick, user, onLogout }) => {
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex gap-4"
+                        className="flex flex-wrap items-center gap-2"
                     >
                         {user ? (
-                            <div className="flex items-center gap-4">
-                                <span className="text-white">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-white text-sm md:text-base truncate max-w-[150px] md:max-w-none">
                                     {user.carrera ? `${user.nombre} ${user.apellido}` : user.nombre}
                                 </span>
                                 <button
                                     onClick={handleLogoutClick}
-                                    className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+                                    className="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 text-sm rounded-lg transition-colors"
                                 >
                                     Cerrar Sesión
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex gap-4">
+                            <div className="flex gap-2">
                                 <button
                                     onClick={() => onAuthClick('login')}
-                                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+                                    className="flex items-center gap-1 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 text-sm rounded-lg transition-colors"
                                 >
-                                    <FaUserCircle className="text-xl" />
+                                    <FaUserCircle className="text-lg" />
                                     <span>Iniciar Sesión</span>
                                 </button>
                                 <button
                                     onClick={() => onAuthClick('register')}
-                                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+                                    className="flex items-center gap-1 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 text-sm rounded-lg transition-colors"
                                 >
-                                    <FaUserCircle className="text-xl" />
+                                    <FaUserCircle className="text-lg" />
                                     <span>Registrarse</span>
                                 </button>
                             </div>
