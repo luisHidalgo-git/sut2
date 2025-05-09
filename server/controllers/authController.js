@@ -40,7 +40,7 @@ const registerEstudiante = async (req, res) => {
       success: true,
       message: 'Estudiante registrado exitosamente',
       token,
-      estudiante: {
+      user: {
         id: estudiante.id_estudiante,
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
@@ -95,7 +95,7 @@ const registerEmpresa = async (req, res) => {
       success: true,
       message: 'Empresa registrada exitosamente',
       token,
-      empresa: {
+      user: {
         id: empresa.id_empresa,
         nombre: empresa.nombre,
         email: empresa.email,
@@ -169,7 +169,7 @@ const login = async (req, res) => {
       user: {
         id: userType === 'estudiante' ? user.id_estudiante : user.id_empresa,
         nombre: user.nombre,
-        apellido: user.apellido, // Asegúrate de incluir este campo
+        apellido: user.apellido,
         email: user.email,
         ...(userType === 'estudiante' ? { carrera: user.carrera, semestre: user.semestre } : { direccion: user.direccion, tipo: user.tipo })
       }
@@ -223,6 +223,6 @@ const refreshToken = async (req, res) => {
 module.exports = {
   registerEstudiante,
   registerEmpresa,
-  login, // Reemplaza loginEstudiante y loginEmpresa con esta función unificada
+  login,
   refreshToken
 };
