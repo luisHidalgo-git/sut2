@@ -88,15 +88,15 @@ const AuthModal = ({ isOpen, onClose, type, onTypeChange, onLoginSuccess, onErro
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('user', JSON.stringify(response.user));
                 
-                if (type === 'login') {
-                    await showSuccessAlert('¡Bienvenido!', `Has iniciado sesión como ${response.user.nombre}`);
-                } else {
-                    await showSuccessAlert('¡Registro exitoso!', `Tu cuenta ha sido creada correctamente`);
-                }
+                await showSuccessAlert(
+                    type === 'login' ? '¡Bienvenido!' : '¡Registro exitoso!',
+                    type === 'login' 
+                        ? `Has iniciado sesión como ${response.user.nombre}`
+                        : 'Tu cuenta ha sido creada correctamente'
+                );
                 
                 onLoginSuccess(response.user);
                 onClose();
-                return;
             }
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Error en la operación';
