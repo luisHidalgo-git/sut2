@@ -11,12 +11,16 @@ class User(AbstractUser):
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    student_id = models.CharField(max_length=20)
     career = models.CharField(max_length=100)
     semester = models.IntegerField()
 
 class CompanyProfile(models.Model):
+    COMPANY_SIZE_CHOICES = (
+        ('small', 'Small'),
+        ('medium', 'Medium'),
+        ('large', 'Large'),
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    company_name = models.CharField(max_length=100)
+    company_size = models.CharField(max_length=10, choices=COMPANY_SIZE_CHOICES)
     industry = models.CharField(max_length=100)
     website = models.URLField()

@@ -2,18 +2,18 @@ from rest_framework import serializers
 from .models import User, StudentProfile, CompanyProfile
 
 class StudentRegistrationSerializer(serializers.ModelSerializer):
-    student_id = serializers.CharField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
     career = serializers.CharField()
     semester = serializers.IntegerField()
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'student_id', 'career', 'semester']
+        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'career', 'semester']
 
     def create(self, validated_data):
         profile_data = {
-            'student_id': validated_data.pop('student_id'),
             'career': validated_data.pop('career'),
             'semester': validated_data.pop('semester'),
         }
@@ -23,18 +23,18 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 class CompanyRegistrationSerializer(serializers.ModelSerializer):
-    company_name = serializers.CharField()
+    company_size = serializers.ChoiceField(choices=CompanyProfile.COMPANY_SIZE_CHOICES)
     industry = serializers.CharField()
     website = serializers.URLField()
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'company_name', 'industry', 'website']
+        fields = ['username', 'email', 'password', 'company_size', 'industry', 'website']
 
     def create(self, validated_data):
         profile_data = {
-            'company_name': validated_data.pop('company_name'),
+            'company_size': validated_data.pop('company_size'),
             'industry': validated_data.pop('industry'),
             'website': validated_data.pop('website'),
         }
