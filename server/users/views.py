@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import StudentRegistrationSerializer, CompanyRegistrationSerializer, LoginSerializer
+from .models import User
 
 @api_view(['POST'])
 def register_student(request):
@@ -34,17 +35,17 @@ def register_company(request):
 def login(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
-        user = authenticate(
-            username=serializer.validated_data['username'],
-            password=serializer.validated_data['password']
-        )
-        if user:
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user_type': user.user_type
-            })
+        try:
+            user = User.objects.get(email=serializer.validated_data['email'])
+            if user.check_password(serializer.validated_data['password']):
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'user_type': user.user_type
+                })
+        except User.DoesNotExist:
+            pass
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
