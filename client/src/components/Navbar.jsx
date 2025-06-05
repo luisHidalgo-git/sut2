@@ -1,13 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
+import { Menu } from "@headlessui/react";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { showSuccessAlert } from "../utils/alerts";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("token");
+  const username = localStorage.getItem("username");
 
   const handleLogout = async () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userType");
+    localStorage.removeItem("username");
     await showSuccessAlert(
       "Logged Out",
       "You have been successfully logged out."
@@ -24,14 +28,28 @@ export default function Navbar() {
               PracticePro
             </Link>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex items-center space-x-4">
             {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="text-gray-300 hover:text-white px-3 py-2 rounded-md"
-              >
-                Logout
-              </button>
+              <Menu as="div\" className="relative">
+                <Menu.Button className="flex items-center space-x-2 text-gray-300 hover:text-white">
+                  <UserCircleIcon className="h-8 w-8" />
+                  <span>{username}</span>
+                </Menu.Button>
+                <Menu.Items className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={handleLogout}
+                        className={`${
+                          active ? "bg-gray-100" : ""
+                        } block w-full text-left px-4 py-2 text-sm text-gray-700`}
+                      >
+                        Logout
+                      </button>
+                    )}
+                  </Menu.Item>
+                </Menu.Items>
+              </Menu>
             ) : (
               <>
                 <Link

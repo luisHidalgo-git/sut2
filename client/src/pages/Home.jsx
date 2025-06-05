@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import WelcomeMessage from "../components/home/WelcomeMessage";
+import Dashboard from "../components/home/Dashboard";
 import LandingMessage from "../components/home/LandingMessage";
 
 export default function Home() {
@@ -21,6 +21,7 @@ export default function Home() {
             }
           );
           setUsername(response.data.username);
+          localStorage.setItem("username", response.data.username);
         } catch (error) {
           console.error("Error fetching user data:", error);
         }
@@ -31,7 +32,7 @@ export default function Home() {
   }, [isLoggedIn]);
 
   return isLoggedIn ? (
-    <WelcomeMessage username={username} userType={userType} />
+    <Dashboard username={username} userType={userType} />
   ) : (
     <LandingMessage />
   );
