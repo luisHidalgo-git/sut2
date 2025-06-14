@@ -46,3 +46,32 @@ class CompanyRegistrationSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
+
+class UserSerializer(serializers.ModelSerializer):
+    profile_info = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'user_type', 'profile_info']
+
+    def get_profile_info(self, obj):
+        if obj.user_type == 'student':
+            try:
+                profile = obj.studentprofile
+                return {
+                    'career': profile.career,
+                    'semester': profile.semester
+                }
+            except StudentProfile.DoesNotExist:
+                return {}
+        elif obj.user_type == 'company':
+            try:
+                profile = obj.companyprofile
+                return {
+                    'company_size': profile.company_size,
+                    'industry': profile.industry,
+                    'website': profile.website
+                }
+            except CompanyProfile.DoesNotExist:
+                return {}
+        return {}

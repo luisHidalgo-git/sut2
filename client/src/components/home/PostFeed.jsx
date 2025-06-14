@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { 
     HeartIcon, 
     ChatBubbleOvalLeftIcon, 
@@ -7,26 +6,14 @@ import {
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 
-export default function PostFeed({ posts }) {
-    const [likedPosts, setLikedPosts] = useState(new Set());
-
-    const handleLike = (postId) => {
-        const newLikedPosts = new Set(likedPosts);
-        if (newLikedPosts.has(postId)) {
-            newLikedPosts.delete(postId);
-        } else {
-            newLikedPosts.add(postId);
-        }
-        setLikedPosts(newLikedPosts);
-    };
-
+export default function PostFeed({ posts, onLike }) {
     if (posts.length === 0) {
         return (
             <div className="bg-white rounded-lg shadow p-8 text-center">
                 <div className="text-gray-500">
                     <ChatBubbleOvalLeftIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <h3 className="text-lg font-medium mb-2">No posts yet</h3>
-                    <p>Be the first to share something with the community!</p>
+                    <h3 className="text-lg font-medium mb-2">No hay publicaciones aún</h3>
+                    <p>¡Sé el primero en compartir algo con la comunidad!</p>
                 </div>
             </div>
         );
@@ -41,16 +28,16 @@ export default function PostFeed({ posts }) {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                                 <img
-                                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${post.author}`}
-                                    alt={post.author}
+                                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${post.author_name}`}
+                                    alt={post.author_name}
                                     className="h-12 w-12 rounded-full"
                                 />
                                 <div>
                                     <h3 className="font-semibold text-gray-900">
-                                        {post.author}
+                                        {post.author_name}
                                     </h3>
                                     <p className="text-sm text-gray-600">
-                                        {post.authorType === "student" ? "Student" : "Company"} • {post.timestamp}
+                                        {post.author_type === "student" ? "Estudiante" : "Empresa"} • {post.time_since_created}
                                     </p>
                                 </div>
                             </div>
@@ -70,8 +57,8 @@ export default function PostFeed({ posts }) {
                     {/* Post Stats */}
                     <div className="px-6 py-2 border-t border-b border-gray-100">
                         <div className="flex items-center justify-between text-sm text-gray-600">
-                            <span>{post.likes + (likedPosts.has(post.id) ? 1 : 0)} likes</span>
-                            <span>{post.comments} comments</span>
+                            <span>{post.likes_count} me gusta</span>
+                            <span>{post.comments_count} comentarios</span>
                         </div>
                     </div>
 
@@ -79,27 +66,27 @@ export default function PostFeed({ posts }) {
                     <div className="px-6 py-3">
                         <div className="flex items-center justify-around">
                             <button
-                                onClick={() => handleLike(post.id)}
+                                onClick={() => onLike(post.id)}
                                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors ${
-                                    likedPosts.has(post.id) ? "text-red-600" : "text-gray-600"
+                                    post.is_liked ? "text-red-600" : "text-gray-600"
                                 }`}
                             >
-                                {likedPosts.has(post.id) ? (
+                                {post.is_liked ? (
                                     <HeartIconSolid className="h-5 w-5" />
                                 ) : (
                                     <HeartIcon className="h-5 w-5" />
                                 )}
-                                <span className="text-sm font-medium">Like</span>
+                                <span className="text-sm font-medium">Me gusta</span>
                             </button>
                             
                             <button className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors">
                                 <ChatBubbleOvalLeftIcon className="h-5 w-5" />
-                                <span className="text-sm font-medium">Comment</span>
+                                <span className="text-sm font-medium">Comentar</span>
                             </button>
                             
                             <button className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors">
                                 <ShareIcon className="h-5 w-5" />
-                                <span className="text-sm font-medium">Share</span>
+                                <span className="text-sm font-medium">Compartir</span>
                             </button>
                         </div>
                     </div>

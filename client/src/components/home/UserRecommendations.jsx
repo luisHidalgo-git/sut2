@@ -1,10 +1,10 @@
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 
 export default function UserRecommendations({ users = [], showStudentsOnly = false }) {
-    const title = showStudentsOnly ? "Available Students" : "People You May Know";
+    const title = showStudentsOnly ? "Estudiantes Disponibles" : "Personas que Podrías Conocer";
     const emptyMessage = showStudentsOnly 
-        ? "No students have registered yet. Check back later!"
-        : "No other users have joined yet. Invite your friends!";
+        ? "No hay estudiantes registrados aún. ¡Vuelve más tarde!"
+        : "No hay otros usuarios registrados aún. ¡Invita a tus amigos!";
 
     return (
         <div className="bg-white rounded-lg shadow">
@@ -35,19 +35,19 @@ export default function UserRecommendations({ users = [], showStudentsOnly = fal
                                         </h3>
                                         <p className="text-sm text-gray-600">
                                             {user.field}
-                                            {user.semester && ` • Semester ${user.semester}`}
+                                            {user.semester && user.semester > 0 && ` • Semestre ${user.semester}`}
                                         </p>
                                     </div>
                                 </div>
                                 <button className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm hover:bg-indigo-700 transition-colors">
-                                    Connect
+                                    Conectar
                                 </button>
                             </div>
                         ))}
                         
                         {users.length > 3 && (
                             <button className="w-full text-center py-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                                Show more ({users.length - 3} more)
+                                Mostrar más ({users.length - 3} más)
                             </button>
                         )}
                     </div>

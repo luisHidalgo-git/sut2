@@ -14,6 +14,9 @@ class StudentProfile(models.Model):
     career = models.CharField(max_length=100)
     semester = models.IntegerField()
 
+    def __str__(self):
+        return f"{self.user.username} - {self.career}"
+
 class CompanyProfile(models.Model):
     COMPANY_SIZE_CHOICES = (
         ('small', 'Small'),
@@ -24,3 +27,6 @@ class CompanyProfile(models.Model):
     company_size = models.CharField(max_length=10, choices=COMPANY_SIZE_CHOICES)
     industry = models.CharField(max_length=100)
     website = models.URLField()
+
+    def __str__(self):
+        return f"{self.user.username} - {self.industry}"

@@ -4,22 +4,21 @@ import { PencilSquareIcon, PhotoIcon } from "@heroicons/react/24/outline";
 export default function CreatePost({ onNewPost, username, userType }) {
     const [postContent, setPostContent] = useState("");
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (postContent.trim()) {
-            const newPost = {
-                id: Date.now(),
-                author: username,
-                authorType: userType,
-                content: postContent,
-                timestamp: "Just now",
-                likes: 0,
-                comments: 0
-            };
-            onNewPost(newPost);
-            setPostContent("");
-            setIsExpanded(false);
+        if (postContent.trim() && !isSubmitting) {
+            setIsSubmitting(true);
+            try {
+                await onNewPost({ content: postContent });
+                setPostContent("");
+                setIsExpanded(false);
+            } catch (error) {
+                console.error("Error creating post:", error);
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
@@ -36,8 +35,8 @@ export default function CreatePost({ onNewPost, username, userType }) {
                     className="flex-1 text-left px-4 py-3 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
                 >
                     {userType === "student" 
-                        ? "Share your internship journey..." 
-                        : "Share opportunities or company updates..."}
+                        ? "Comparte tu experiencia de prácticas..." 
+                        : "Comparte oportunidades o noticias de la empresa..."}
                 </button>
             </div>
 
@@ -47,11 +46,12 @@ export default function CreatePost({ onNewPost, username, userType }) {
                         value={postContent}
                         onChange={(e) => setPostContent(e.target.value)}
                         placeholder={userType === "student" 
-                            ? "What's on your mind about your career journey?" 
-                            : "Share job opportunities or company news..."}
+                            ? "¿Qué tienes en mente sobre tu carrera profesional?" 
+                            : "Comparte oportunidades de trabajo o noticias de la empresa..."}
                         className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         rows="4"
                         autoFocus
+                        disabled={isSubmitting}
                     />
                     
                     <div className="flex items-center justify-between">
@@ -59,9 +59,10 @@ export default function CreatePost({ onNewPost, username, userType }) {
                             <button
                                 type="button"
                                 className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600"
+                                disabled={isSubmitting}
                             >
                                 <PhotoIcon className="h-5 w-5" />
-                                <span className="text-sm">Photo</span>
+                                <span className="text-sm">Foto</span>
                             </button>
                         </div>
                         
@@ -73,15 +74,16 @@ export default function CreatePost({ onNewPost, username, userType }) {
                                     setPostContent("");
                                 }}
                                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                disabled={isSubmitting}
                             >
-                                Cancel
+                                Cancelar
                             </button>
                             <button
                                 type="submit"
-                                disabled={!postContent.trim()}
+                                disabled={!postContent.trim() || isSubmitting}
                                 className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Post
+                                {isSubmitting ? "Publicando..." : "Publicar"}
                             </button>
                         </div>
                     </div>
@@ -92,11 +94,11 @@ export default function CreatePost({ onNewPost, username, userType }) {
                 <div className="flex justify-between border-t pt-4">
                     <button className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-50">
                         <PencilSquareIcon className="h-5 w-5" />
-                        <span className="text-sm font-medium">Write article</span>
+                        <span className="text-sm font-medium">Escribir artículo</span>
                     </button>
                     <button className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-50">
                         <PhotoIcon className="h-5 w-5" />
-                        <span className="text-sm font-medium">Add photo</span>
+                        <span className="text-sm font-medium">Agregar foto</span>
                     </button>
                 </div>
             )}

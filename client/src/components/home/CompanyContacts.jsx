@@ -5,14 +5,14 @@ export default function CompanyContacts({ companies = [] }) {
         <div className="bg-white rounded-lg shadow">
             <div className="p-6">
                 <h2 className="text-lg font-semibold mb-4">
-                    Companies You Might Like
+                    Empresas que Podrían Interesarte
                 </h2>
                 
                 {companies.length === 0 ? (
                     <div className="text-center py-8">
                         <BuildingOfficeIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                         <p className="text-gray-500 text-sm">
-                            No companies have registered yet. Check back later for internship opportunities!
+                            No hay empresas registradas aún. ¡Vuelve más tarde para ver oportunidades de prácticas!
                         </p>
                     </div>
                 ) : (
@@ -38,14 +38,14 @@ export default function CompanyContacts({ companies = [] }) {
                                     </div>
                                 </div>
                                 <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-200 transition-colors">
-                                    Follow
+                                    Seguir
                                 </button>
                             </div>
                         ))}
                         
                         {companies.length > 3 && (
                             <button className="w-full text-center py-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                                Show more ({companies.length - 3} more)
+                                Mostrar más ({companies.length - 3} más)
                             </button>
                         )}
                     </div>

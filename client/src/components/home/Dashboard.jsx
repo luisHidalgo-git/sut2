@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import UserRecommendations from "./UserRecommendations";
 import CompanyContacts from "./CompanyContacts";
 import PostFeed from "./PostFeed";
@@ -8,67 +9,109 @@ export default function Dashboard({ username, userType }) {
     const [posts, setPosts] = useState([]);
     const [users, setUsers] = useState([]);
     const [companies, setCompanies] = useState([]);
+    const [stats, setStats] = useState({
+        posts_count: 0,
+        connections_count: 0,
+        profile_views: 127
+    });
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const token = localStorage.getItem("token");
+    const axiosConfig = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
 
     useEffect(() => {
-        // Simulate API call with timeout
-        const timer = setTimeout(() => {
-            // Mock posts data
-            setPosts([
-                {
-                    id: 1,
-                    author: "Alice Johnson",
-                    authorType: "student",
-                    content: "¡Acabo de completar mi primera solicitud de prácticas! Emocionada por las oportunidades que se avecinan. Espero ganar experiencia del mundo real en desarrollo de software.",
-                    timestamp: "hace 2 horas",
-                    likes: 12,
-                    comments: 3
-                },
-                {
-                    id: 2,
-                    author: "Tech Corp",
-                    authorType: "company",
-                    content: "Estamos buscando estudiantes talentosos para unirse a nuestro programa de verano. Gran oportunidad para trabajar con tecnologías de vanguardia y mentores experimentados. ¡Aplica ahora!",
-                    timestamp: "hace 5 horas",
-                    likes: 25,
-                    comments: 8
-                },
-                {
-                    id: 3,
-                    author: "María García",
-                    authorType: "student",
-                    content: "¡Asistiendo a la feria de carreras hoy! Emocionada de conocer empleadores potenciales y aprender sobre oportunidades de prácticas en mi campo.",
-                    timestamp: "hace 1 día",
-                    likes: 8,
-                    comments: 2
-                }
-            ]);
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                
+                // Fetch posts
+                const postsResponse = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/posts/`,
+                    axiosConfig
+                );
+                setPosts(postsResponse.data);
 
-            // Mock users data
-            setUsers([
-                { id: 1, name: "Alice Johnson", field: "Ciencias de la Computación", semester: 6 },
-                { id: 2, name: "Bob Smith", field: "Ingeniería Mecánica", semester: 4 },
-                { id: 3, name: "Carol White", field: "Administración de Empresas", semester: 8 },
-                { id: 4, name: "David Chen", field: "Ingeniería Eléctrica", semester: 2 },
-                { id: 5, name: "Emma Wilson", field: "Marketing", semester: 6 }
-            ]);
+                // Fetch students
+                const studentsResponse = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/students/`,
+                    axiosConfig
+                );
+                setUsers(studentsResponse.data);
 
-            // Mock companies data
-            setCompanies([
-                { id: 1, name: "Tech Corp", industry: "Tecnología", size: "Grande" },
-                { id: 2, name: "Design Studio", industry: "Diseño y Creatividad", size: "Pequeña" },
-                { id: 3, name: "Finance Plus", industry: "Servicios Financieros", size: "Mediana" },
-                { id: 4, name: "Green Energy Co", industry: "Energía Renovable", size: "Mediana" }
-            ]);
+                // Fetch companies
+                const companiesResponse = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/companies/`,
+                    axiosConfig
+                );
+                setCompanies(companiesResponse.data);
 
-            setLoading(false);
-        }, 500);
+                // Fetch dashboard stats
+                const statsResponse = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/dashboard/stats/`,
+                    axiosConfig
+                );
+                setStats(statsResponse.data);
 
-        return () => clearTimeout(timer);
+                setError(null);
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+                setError("Error al cargar los datos del dashboard");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, []);
 
-    const handleNewPost = (newPost) => {
-        setPosts([newPost, ...posts]);
+    const handleNewPost = async (postData) => {
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/posts/create/`,
+                { content: postData.content },
+                axiosConfig
+            );
+            
+            // Add the new post to the beginning of the posts array
+            setPosts([response.data, ...posts]);
+            
+            // Update stats
+            setStats(prev => ({
+                ...prev,
+                posts_count: prev.posts_count + 1
+            }));
+        } catch (error) {
+            console.error("Error creating post:", error);
+            setError("Error al crear la publicación");
+        }
+    };
+
+    const handleLike = async (postId) => {
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/posts/${postId}/like/`,
+                {},
+                axiosConfig
+            );
+            
+            // Update the post in the posts array
+            setPosts(posts.map(post => 
+                post.id === postId 
+                    ? { 
+                        ...post, 
+                        is_liked: response.data.liked,
+                        likes_count: response.data.likes_count 
+                    }
+                    : post
+            ));
+        } catch (error) {
+            console.error("Error toggling like:", error);
+        }
     };
 
     if (loading) {
@@ -77,6 +120,26 @@ export default function Dashboard({ username, userType }) {
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="container mx-auto px-4 py-8">
+                    <div className="flex justify-center items-center h-64">
+                        <div className="text-center">
+                            <p className="text-red-600 mb-4">{error}</p>
+                            <button 
+                                onClick={() => window.location.reload()} 
+                                className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                            >
+                                Reintentar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,11 +168,15 @@ export default function Dashboard({ username, userType }) {
                                 <div className="border-t pt-4 space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Vistas del perfil</span>
-                                        <span className="font-semibold text-gray-900">127</span>
+                                        <span className="font-semibold text-gray-900">{stats.profile_views}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Publicaciones</span>
+                                        <span className="font-semibold text-gray-900">{stats.posts_count}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Conexiones</span>
-                                        <span className="font-semibold text-gray-900">45</span>
+                                        <span className="font-semibold text-gray-900">{stats.connections_count}</span>
                                     </div>
                                 </div>
                             </div>
@@ -119,7 +186,7 @@ export default function Dashboard({ username, userType }) {
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
                         <CreatePost onNewPost={handleNewPost} username={username} userType={userType} />
-                        <PostFeed posts={posts} />
+                        <PostFeed posts={posts} onLike={handleLike} />
                     </div>
 
                     {/* Right Sidebar - Recommendations */}
