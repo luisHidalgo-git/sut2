@@ -71,11 +71,28 @@ export default function Dashboard({ username, userType }) {
 
     const handleNewPost = async (postData) => {
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/posts/create/`,
-                { content: postData.content },
-                axiosConfig
-            );
+            let response;
+            
+            if (postData instanceof FormData) {
+                // Handle form data with potential image
+                response = await axios.post(
+                    `${import.meta.env.VITE_API_URL}/posts/create/`,
+                    postData,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+            } else {
+                // Handle regular text post
+                response = await axios.post(
+                    `${import.meta.env.VITE_API_URL}/posts/create/`,
+                    { content: postData.content },
+                    axiosConfig
+                );
+            }
             
             // Add the new post to the beginning of the posts array
             setPosts([response.data, ...posts]);
@@ -88,6 +105,7 @@ export default function Dashboard({ username, userType }) {
         } catch (error) {
             console.error("Error creating post:", error);
             setError("Error al crear la publicación");
+            throw error; // Re-throw to handle in CreatePost component
         }
     };
 

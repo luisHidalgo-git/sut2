@@ -2,11 +2,81 @@ import {
     HeartIcon, 
     ChatBubbleOvalLeftIcon, 
     ShareIcon,
-    EllipsisHorizontalIcon
+    EllipsisHorizontalIcon,
+    PaperAirplaneIcon
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
+import { useState } from "react";
+import axios from "axios";
 
 export default function PostFeed({ posts, onLike }) {
+    const [expandedComments, setExpandedComments] = useState({});
+    const [comments, setComments] = useState({});
+    const [newComment, setNewComment] = useState({});
+    const [loadingComments, setLoadingComments] = useState({});
+
+    const token = localStorage.getItem("token");
+    const axiosConfig = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+
+    const toggleComments = async (postId) => {
+        if (expandedComments[postId]) {
+            setExpandedComments(prev => ({ ...prev, [postId]: false }));
+        } else {
+            setExpandedComments(prev => ({ ...prev, [postId]: true }));
+            
+            // Load comments if not already loaded
+            if (!comments[postId]) {
+                setLoadingComments(prev => ({ ...prev, [postId]: true }));
+                try {
+                    const response = await axios.get(
+                        `${import.meta.env.VITE_API_URL}/posts/${postId}/comments/`,
+                        axiosConfig
+                    );
+                    setComments(prev => ({ ...prev, [postId]: response.data }));
+                } catch (error) {
+                    console.error("Error loading comments:", error);
+                } finally {
+                    setLoadingComments(prev => ({ ...prev, [postId]: false }));
+                }
+            }
+        }
+    };
+
+    const handleAddComment = async (postId) => {
+        const commentText = newComment[postId]?.trim();
+        if (!commentText) return;
+
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/posts/${postId}/comments/create/`,
+                { content: commentText },
+                axiosConfig
+            );
+
+            // Add new comment to the list
+            setComments(prev => ({
+                ...prev,
+                [postId]: [...(prev[postId] || []), response.data]
+            }));
+
+            // Clear the input
+            setNewComment(prev => ({ ...prev, [postId]: "" }));
+        } catch (error) {
+            console.error("Error adding comment:", error);
+        }
+    };
+
+    const handleKeyPress = (e, postId) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleAddComment(postId);
+        }
+    };
+
     if (posts.length === 0) {
         return (
             <div className="bg-white rounded-lg shadow p-8 text-center">
@@ -49,7 +119,7 @@ export default function PostFeed({ posts, onLike }) {
 
                     {/* Post Content */}
                     <div className="px-6 pb-4">
-                        <p className="text-gray-900 leading-relaxed">
+                        <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
                             {post.content}
                         </p>
                     </div>
@@ -79,7 +149,10 @@ export default function PostFeed({ posts, onLike }) {
                                 <span className="text-sm font-medium">Me gusta</span>
                             </button>
                             
-                            <button className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors">
+                            <button 
+                                onClick={() => toggleComments(post.id)}
+                                className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors"
+                            >
                                 <ChatBubbleOvalLeftIcon className="h-5 w-5" />
                                 <span className="text-sm font-medium">Comentar</span>
                             </button>
@@ -90,6 +163,74 @@ export default function PostFeed({ posts, onLike }) {
                             </button>
                         </div>
                     </div>
+
+                    {/* Comments Section */}
+                    {expandedComments[post.id] && (
+                        <div className="px-6 pb-6 border-t border-gray-100">
+                            {/* Add Comment */}
+                            <div className="flex items-start space-x-3 mt-4">
+                                <img
+                                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${localStorage.getItem('username')}`}
+                                    alt="You"
+                                    className="h-8 w-8 rounded-full"
+                                />
+                                <div className="flex-1 flex items-end space-x-2">
+                                    <textarea
+                                        value={newComment[post.id] || ""}
+                                        onChange={(e) => setNewComment(prev => ({ 
+                                            ...prev, 
+                                            [post.id]: e.target.value 
+                                        }))}
+                                        onKeyPress={(e) => handleKeyPress(e, post.id)}
+                                        placeholder="Escribe un comentario..."
+                                        className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        rows="2"
+                                    />
+                                    <button
+                                        onClick={() => handleAddComment(post.id)}
+                                        disabled={!newComment[post.id]?.trim()}
+                                        className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <PaperAirplaneIcon className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Comments List */}
+                            <div className="mt-4 space-y-3">
+                                {loadingComments[post.id] ? (
+                                    <div className="text-center py-4">
+                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto"></div>
+                                    </div>
+                                ) : (
+                                    comments[post.id]?.map((comment) => (
+                                        <div key={comment.id} className="flex items-start space-x-3">
+                                            <img
+                                                src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.author_name}`}
+                                                alt={comment.author_name}
+                                                className="h-8 w-8 rounded-full"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="bg-gray-100 rounded-lg p-3">
+                                                    <div className="flex items-center space-x-2 mb-1">
+                                                        <span className="font-medium text-sm text-gray-900">
+                                                            {comment.author_name}
+                                                        </span>
+                                                        <span className="text-xs text-gray-500">
+                                                            {comment.time_since_created}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                                                        {comment.content}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             ))}
         </div>

@@ -1,18 +1,29 @@
-import { useState } from "react";
-import { PencilSquareIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { useState, useRef } from "react";
+import { PencilSquareIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function CreatePost({ onNewPost, username, userType }) {
     const [postContent, setPostContent] = useState("");
     const [isExpanded, setIsExpanded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const fileInputRef = useRef(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (postContent.trim() && !isSubmitting) {
+        if ((postContent.trim() || selectedImage) && !isSubmitting) {
             setIsSubmitting(true);
             try {
-                await onNewPost({ content: postContent });
+                const formData = new FormData();
+                formData.append('content', postContent);
+                if (selectedImage) {
+                    formData.append('image', selectedImage);
+                }
+                
+                await onNewPost(formData);
                 setPostContent("");
+                setSelectedImage(null);
+                setImagePreview(null);
                 setIsExpanded(false);
             } catch (error) {
                 console.error("Error creating post:", error);
@@ -20,6 +31,35 @@ export default function CreatePost({ onNewPost, username, userType }) {
                 setIsSubmitting(false);
             }
         }
+    };
+
+    const handleImageSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert("La imagen debe ser menor a 5MB");
+                return;
+            }
+            
+            setSelectedImage(file);
+            const reader = new FileReader();
+            reader.onload = (e) => setImagePreview(e.target.result);
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const handleCancel = () => {
+        setIsExpanded(false);
+        setPostContent("");
+        removeImage();
     };
 
     return (
@@ -53,11 +93,39 @@ export default function CreatePost({ onNewPost, username, userType }) {
                         autoFocus
                         disabled={isSubmitting}
                     />
+
+                    {/* Image Preview */}
+                    {imagePreview && (
+                        <div className="relative">
+                            <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="max-w-full h-64 object-cover rounded-lg"
+                            />
+                            <button
+                                type="button"
+                                onClick={removeImage}
+                                className="absolute top-2 right-2 p-1 bg-gray-800 bg-opacity-50 text-white rounded-full hover:bg-opacity-70"
+                                disabled={isSubmitting}
+                            >
+                                <XMarkIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+                    )}
                     
                     <div className="flex items-center justify-between">
                         <div className="flex space-x-4">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageSelect}
+                                className="hidden"
+                                disabled={isSubmitting}
+                            />
                             <button
                                 type="button"
+                                onClick={() => fileInputRef.current?.click()}
                                 className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600"
                                 disabled={isSubmitting}
                             >
@@ -69,10 +137,7 @@ export default function CreatePost({ onNewPost, username, userType }) {
                         <div className="flex space-x-3">
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setIsExpanded(false);
-                                    setPostContent("");
-                                }}
+                                onClick={handleCancel}
                                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
                                 disabled={isSubmitting}
                             >
@@ -80,7 +145,7 @@ export default function CreatePost({ onNewPost, username, userType }) {
                             </button>
                             <button
                                 type="submit"
-                                disabled={!postContent.trim() || isSubmitting}
+                                disabled={(!postContent.trim() && !selectedImage) || isSubmitting}
                                 className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? "Publicando..." : "Publicar"}
@@ -92,11 +157,20 @@ export default function CreatePost({ onNewPost, username, userType }) {
 
             {!isExpanded && (
                 <div className="flex justify-between border-t pt-4">
-                    <button className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-50">
+                    <button 
+                        onClick={() => setIsExpanded(true)}
+                        className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-50"
+                    >
                         <PencilSquareIcon className="h-5 w-5" />
                         <span className="text-sm font-medium">Escribir artículo</span>
                     </button>
-                    <button className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-50">
+                    <button 
+                        onClick={() => {
+                            setIsExpanded(true);
+                            setTimeout(() => fileInputRef.current?.click(), 100);
+                        }}
+                        className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-50"
+                    >
                         <PhotoIcon className="h-5 w-5" />
                         <span className="text-sm font-medium">Agregar foto</span>
                     </button>

@@ -9,10 +9,11 @@ class PostSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     time_since_created = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['id', 'content', 'author_name', 'author_type', 'likes_count', 
+        fields = ['id', 'content', 'image_url', 'author_name', 'author_type', 'likes_count', 
                  'comments_count', 'is_liked', 'time_since_created', 'created_at']
 
     def get_likes_count(self, obj):
@@ -26,6 +27,13 @@ class PostSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.likes.filter(user=request.user).exists()
         return False
+
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+        return None
 
     def get_time_since_created(self, obj):
         now = timezone.now()
@@ -45,7 +53,7 @@ class PostSerializer(serializers.ModelSerializer):
 class CreatePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['content']
+        fields = ['content', 'image']
 
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
